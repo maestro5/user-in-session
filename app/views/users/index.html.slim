@@ -1,21 +1,8 @@
 h3 Users
 
-- if @users
+- unless @users.empty?
   hr
-  - @users.each do |id, val|
-    *{id: "user-#{id}"}
-      = val.values.join(' ')
-      = link_to 'Edit', '#', data: { user_id: id }, class: 'link user-edit-link'
-      = link_to 'Destroy', user_path(id), method: :delete, data: {confirm: 'Are you sure?'}, class: 'link'
-
-    *{id: "user-#{id}-edit", class: 'user-edit-form'}
-      = form_tag user_path(id), method: :patch do
-        = label_tag 'user[first_name]', 'First name'
-        = text_field_tag 'user[first_name]', val['first_name'], placeholder: 'James'
-        = label_tag 'user[last_name]', 'Last name'
-        = text_field_tag 'user[last_name]', val['last_name'], placeholder: 'Bond'
-        = submit_tag 'Save'
-    br
+  = render partial: 'user', collection: @users
   hr
   br
 

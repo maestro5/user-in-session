@@ -1,31 +1,28 @@
 class UsersController < ApplicationController
   def index
-    @users = JSON.parse(session[:users]) if session[:users]
+    @users = User.all
   end
 
   def create
     User.new(user_params)
-    save_in_session
+    redirect_to root_path
   end
 
   def update
-    User.update(params[:id], user_params)
-    save_in_session
+    @user = User.find(params[:id])
+    @user.update(user_params)
+    redirect_to root_path
   end
 
   def destroy
-    User.destroy(params[:id])
-    save_in_session
+    @user = User.find(params[:id])
+    @user.destroy
+    redirect_to root_path
   end
 
   private
 
   def user_params
     params.require(:user).permit(:first_name, :last_name).to_h.symbolize_keys
-  end
-
-  def save_in_session
-    session[:users] = User.all.to_json
-    redirect_to root_path
   end
 end

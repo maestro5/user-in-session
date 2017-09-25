@@ -1,33 +1,46 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-  @@user_one = User.new(first_name: 'James', last_name: 'Bond')
-  @@user_two = User.new(first_name: 'Frank', last_name: 'Sinatra')
+  setup do
+    @user_one = User.new(first_name: 'James', last_name: 'Bond')
+    @user_two = User.new(first_name: 'Frank', last_name: 'Sinatra')
+  end
 
   test '.all' do
     users = User.all
-    assert users.key?(@@user_one.id) && users.include?(@@user_two.id)
+    assert_includes users, @user_one
+    assert_includes users, @user_two
   end
 
   test '.find' do
-    assert_equal @@user_one.to_s, User.find(@@user_one.id).values.join(' ')
-    assert_equal @@user_two.to_s, User.find(@@user_two.id).values.join(' ')
+    assert_equal @user_one, User.find(@user_one.id)
+    assert_equal @user_two, User.find(@user_two.id)
   end
 
-  test '.update' do
-    user = User.new(first_name: 'John', last_name: 'Travolta')
-    user_params = { first_name: 'John', last_name: 'Galt' }
-    User.update(user.id, user_params)
-    assert_not_equal user.to_s, User.find(user.id)
+  test '#update' do
+    user_params = { first_name: 'Frank', last_name: 'Ford' }
+    user_two_prev = @user_two.clone
+    @user_two.update(user_params)
+    assert_not user_two_prev.to_s == @user_two.to_s
   end
 
-  test '.destroy' do
-    user = User.new(first_name: 'Harry', last_name: 'Potter')
-    User.destroy(user.id)
-    assert_not User.all.key? user.id
+  test '#update when param is empty' do
+    user_params = { first_name: '', last_name: 'Ford' }
+    user_two_prev = @user_two.clone
+    @user_two.update(user_params)
+    assert user_two_prev.first_name == @user_two.first_name
+  end
+
+  test '#destroy' do
+    @user_one.destroy
+    assert_not_includes User.all, @user_one
   end
 
   test '#to_s' do
-    assert @@user_one.to_s == "#{@@user_one.first_name} #{@@user_one.last_name}"
+    assert @user_one.to_s == "#{@user_one.first_name} #{@user_one.last_name}"
+  end
+
+  def teardown
+    User.delete_all
   end
 end

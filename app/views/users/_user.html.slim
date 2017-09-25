@@ -1,0 +1,12 @@
+= user.to_s
+= link_to 'Edit', '#', data: { user_id: user.id }, class: 'link user-edit-link'
+= link_to 'Destroy', user_path(user.id), method: :delete, data: {confirm: 'Are you sure?'}, class: 'link'
+
+*{id: "user-#{user.id}-edit", class: 'user-edit-form'}
+  = form_tag user_path(user.id), method: :patch do
+    = label_tag 'user[first_name]', 'First name'
+    = text_field_tag 'user[first_name]', user.first_name, placeholder: 'James'
+    = label_tag 'user[last_name]', 'Last name'
+    = text_field_tag 'user[last_name]', user.last_name, placeholder: 'Bond'
+    = submit_tag 'Save'
+br

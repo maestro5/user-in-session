@@ -1,22 +1,18 @@
 class User
-  attr_accessor :id, :first_name, :last_name
-  @@users = {}
+  attr_accessor :first_name, :last_name, :persist
+  attr_reader :id
 
   class << self
     def all
-      @@users
+      ObjectSpace.each_object(self).to_a.reject { |user| user.persist == false }
     end
 
     def find(id)
-      @@users[id.to_i]
+      all.select { |user| user.id == id.to_i }&.first
     end
 
-    def update(id, user_params)
-      find(id).merge! user_params
-    end
-
-    def destroy(id)
-      all.except! id.to_i
+    def delete_all
+      all.map(&:destroy)
     end
   end
 
@@ -24,7 +20,15 @@ class User
     @first_name = first_name
     @last_name  = last_name
     @id = User.all.count + 1
-    @@users.merge! @id => { first_name: @first_name, last_name: @last_name }
+    @persist = true
+  end
+
+  def update(user_params)
+    user_params.each { |k, v| send("#{k}=", v) unless v.empty? }
+  end
+
+  def destroy
+    self.persist = false
   end
 
   def to_s
