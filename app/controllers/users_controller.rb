@@ -1,26 +1,30 @@
 class UsersController < ApplicationController
+  before_action :init_storage
+
   def index
-    @users = User.all
+    @users = @storage.all
   end
 
   def create
-    User.new(user_params)
+    @storage.add(user_params)
     redirect_to root_path
   end
 
   def update
-    @user = User.find(params[:id])
-    @user.update(user_params)
+    @storage.update(params[:id], user_params)
     redirect_to root_path
   end
 
   def destroy
-    @user = User.find(params[:id])
-    @user.destroy
+    @storage.destroy(params[:id])
     redirect_to root_path
   end
 
   private
+
+  def init_storage
+    @storage = UserList.new(session)
+  end
 
   def user_params
     params.require(:user).permit(:first_name, :last_name).to_h.symbolize_keys
