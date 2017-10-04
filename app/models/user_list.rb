@@ -1,34 +1,28 @@
 class UserList
   def initialize(storage)
     @storage = storage
-    @users   = parse_storage
+    parse
   end
 
-  def all
-    @users
+  def generate_new_id
+    @users.last.id + 1
   end
 
-  def delete_all
-    @storage = nil
-  end
-
-  def add(user_params)
-    user = User.new(user_params)
-    user.id = @users.count + 1
-    @users << UserSerializer.new(user).to_h
-    save
+  def add(user)
+    @users << user
+    @storage.write @users
+    true
   end
 
   def find(id)
     id   = id.to_i
-    user = @users.find { |user| user.id == id }
+    user = @users.find { |u| u.id == id }
     @users[@users.index(user)]
   end
 
-  def update(id, user_params)
-    user = find(id)
-    user.update(user_params)
-    save
+  def save
+    @storage.write @users
+    true
   end
 
   def destroy(id)
@@ -36,13 +30,25 @@ class UserList
     save
   end
 
-  private
-
-  def parse_storage
-    @storage[:users] ? UserSerializer.parse_collection(@storage[:users]) : []
+  def all
+    @users
   end
 
-  def save
-    @storage[:users] = @users.to_json
+  delegate :count, to: :all
+
+  def rollback
+    parse
+    self
+  end
+
+  def delete_all
+    @storage.write nil
+  end
+
+  private
+
+  def parse
+    return [] unless @storage
+    @users = @storage.read.inject([]) { |rez, user| rez << User.new(user.symbolize_keys) }
   end
 end

@@ -1,29 +1,41 @@
 class UsersController < ApplicationController
-  before_action :init_storage
-
   def index
-    @users = @storage.all
+    @users = users_collection.all
+    @user = User.new
   end
 
   def create
-    @storage.add(user_params)
-    redirect_to root_path
+    @user = User.new(user_params.merge!(id: users_collection.generate_new_id))
+    if @user.valid?
+      users_collection.add @user
+      redirect_to root_path
+    else
+      @users = users_collection.all
+      render :index
+    end
   end
 
   def update
-    @storage.update(params[:id], user_params)
-    redirect_to root_path
+    @user = users_collection.find(params[:id])
+    if @user.update(user_params)
+      users_collection.save
+      redirect_to root_path
+    else
+      @users = users_collection.rollback.all
+      render :index
+    end
   end
 
   def destroy
-    @storage.destroy(params[:id])
+    users_collection.destroy(params[:id])
     redirect_to root_path
   end
 
   private
 
-  def init_storage
-    @storage = UserList.new(session)
+  def users_collection
+    storage = Storage.new(session, UserSerializer.new)
+    UserList.new(storage)
   end
 
   def user_params
