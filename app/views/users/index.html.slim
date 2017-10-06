@@ -1,0 +1,28 @@
+h3 Users
+
+/ users
+- unless @users.empty?
+  hr
+  = render partial: 'user', collection: @users
+  hr
+  br
+
+/ errors
+= render 'errors'
+
+/ new user form
+= form_tag users_path do
+  = label_tag 'user[first_name]', 'First name'
+  = text_field_tag 'user[first_name]', @user.first_name, placeholder: 'James'
+  = label_tag 'user[last_name]', 'Last name'
+  = text_field_tag 'user[last_name]', @user.last_name, placeholder: 'Bond'
+  = submit_tag 'Add'
+
+
+/ show edit form js
+coffee:
+  $('.user-edit-link').click (e) ->
+    e.preventDefault()
+    user_id = $(this).data('userId')
+    $('#user-' + user_id).hide()
+    $('#user-' + user_id + '-edit').show()
