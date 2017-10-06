@@ -2,6 +2,7 @@ class Storage
   def initialize(storage, serializer)
     @storage    = storage
     @serializer = serializer
+    raise 'Storage can\'t be nil, set the storage' unless @storage
   end
 
   # return users hash collection

@@ -18,10 +18,10 @@ class UsersController < ApplicationController
   def update
     @user = users_collection.find(params[:id])
     if @user.update(user_params)
-      users_collection.save
+      users_collection.update(@user)
       redirect_to root_path
     else
-      @users = users_collection.rollback.all
+      @users = users_collection.all
       render :index
     end
   end

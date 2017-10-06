@@ -12,6 +12,12 @@ class UserListTest < ActiveSupport::TestCase
     @subject.add @user_two
   end
 
+  test '#ids' do
+    assert_includes @subject.ids, @user_one.id
+    assert_includes @subject.ids, @user_two.id
+    assert_not_includes @subject.ids, @user_three.id
+  end
+
   test '#generate_new_id' do
     assert_equal 7, @subject.generate_new_id
   end
@@ -33,6 +39,13 @@ class UserListTest < ActiveSupport::TestCase
     assert_includes @tmp_storage[:users], first_name
   end
 
+  test '#update' do
+    first_name = 'Jaklin'
+    @user_one.first_name = first_name
+    @subject.update(@user_one)
+    assert_equal @subject.find(@user_one.id).first_name, first_name
+  end
+
   test '#destroy' do
     @subject.destroy(5)
     assert_not_includes @subject.all, @user_one
@@ -47,19 +60,12 @@ class UserListTest < ActiveSupport::TestCase
     assert_equal @subject.count, 2
   end
 
-  test '#rollback' do
-    first_name = 'Jaklin'
-    @subject.find(5).first_name = first_name
-    @subject.rollback
-    assert_not_equal @subject.find(5).first_name, first_name
-  end
-
-  test '#delete_all' do
-    @subject.delete_all
+  test '#clear' do
+    @subject.clear
     assert @subject.all, "null"
   end
 
   def teardown
-    @subject.delete_all
+    @subject.clear
   end
 end

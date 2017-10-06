@@ -1,28 +1,36 @@
 class UserList
   def initialize(storage)
     @storage = storage
-    parse
+    @users = parse
+  end
+
+  def ids
+    all.map(&:id)
   end
 
   def generate_new_id
-    @users.last.id + 1
+    ids.max.to_i + 1
   end
 
   def add(user)
     @users << user
-    @storage.write @users
-    true
+    save
   end
 
   def find(id)
     id   = id.to_i
     user = @users.find { |u| u.id == id }
-    @users[@users.index(user)]
   end
 
   def save
     @storage.write @users
     true
+  end
+
+  def update(user)
+    user_index = @users.index find(user.id)
+    @users[user_index] = user
+    save
   end
 
   def destroy(id)
@@ -36,19 +44,13 @@ class UserList
 
   delegate :count, to: :all
 
-  def rollback
-    parse
-    self
-  end
-
-  def delete_all
+  def clear
     @storage.write nil
   end
 
   private
 
   def parse
-    return [] unless @storage
-    @users = @storage.read.inject([]) { |rez, user| rez << User.new(user.symbolize_keys) }
+    @storage.read.inject([]) { |rez, user| rez << User.new(user.symbolize_keys) }
   end
 end
